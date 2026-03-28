@@ -7,8 +7,24 @@
     <link rel="stylesheet" href="CSS/style.css"</link>
   </head>
   <body>
-    <div id="events-calendar"></div>
+    <nav>
+    </nav>
+    <button id="filter-toggle">Filters</button>
+    <div id="filters" style="display: none;">
+      <label>Date:
+        <input type="date" id="date-filter">
+      </label>
+      <label>Sport:
+        <select id="sport-filter">
+          <option value="">Choose sport</option>
+        </select>
+      </label>
+      <button id="filter-button">Filter</button>
+    </div>
     <p id="errors" style="color: red;"></p>
+    <div id="events-container">
+      <table id="events-calendar"></table>
+    </div>
     <script>
     function loadCalendar(events) {
       const groupedByDate = {};
@@ -18,6 +34,7 @@
       });
 
       const table = document.getElementById("events-calendar");
+      table.innerHTML = "";
 
       Object.keys(groupedByDate).forEach(day => {
         const dailyEvents = groupedByDate[day];
@@ -86,35 +103,100 @@
       });
     }
 
+    function loadSportsFilter(sportsArr) {
+      const sportsMenu = document.getElementById("sport-filter");
+
+      sportsArr.forEach(sport => {
+        let sportOption = document.createElement("option");
+        sportOption.value = sport;
+        sportOption.innerHTML = sport;
+        sportsMenu.appendChild(sportOption);
+      })
+    }
+
+    const filterMenu = document.getElementById("filters");
+    document.getElementById("filter-toggle").addEventListener("click", (e) => {
+      e.stopPropagation();
+      filterMenu.style.display = filterMenu.style.display === "none" ? "flex" : "none";
+    });
+    document.addEventListener("click", (e) => {
+      if (!filterMenu.contains(e.target)) {
+        filterMenu.style.display = "none";
+      }
+    });
+
+    document.getElementById("filter-button").addEventListener("click", () => {
+      const date = document.getElementById("date-filter").value;
+      const sport = document.getElementById("sport-filter").value;
+      filterMenu.style.display = "none";
+      loadEvents(date || null, sport || null);
+    });
+
+    async function loadEvents(dateFilter, sportFilter) {
+      const url = new URL("http://localhost:8080/api/events");
+      if (dateFilter) url.searchParams.append("date", dateFilter);
+      if (sportFilter) url.searchParams.append("sport", sportFilter);
+
+      try {
+        document.getElementById("events-calendar").innerHTML = "";
+        const res = await fetch(url.toString(), {
+          method: "GET",
+        });
+
+        if (res.ok) {
+          const apiData = await res.json();
+          if (!apiData || apiData.length === 0) {
+            document.getElementById("errors").textContent = "No events found";
+            return;
+          }
+          const events = apiData.map(ev => ({
+            event_id: ev.event_id,
+            date: ev.date,
+            time: ev.time || "",
+            status: ev.status,
+            competition: ev.competition || "",
+            season: ev.season || "",
+            stage: ev.stage || "",
+            home: ev.home || "",
+            away: ev.away || "",
+            home_points: ev.result ? ev.result.home_points : null,
+            away_points: ev.result ? ev.result.away_points : null,
+            outcome: ev.outcome || "",
+            winner: ev.result ? ev.result.winner : ""
+          }));
+
+          document.getElementById("errors").textContent = "";
+          loadCalendar(events);
+        } else {
+          const err = await res.json();
+          document.getElementById("errors").textContent = err.message;
+        }
+      } catch (e) {
+        document.getElementById("errors").textContent = e.message;
+      }
+    }
+
     (async () => {
-      const res = await fetch("http://localhost:8080/api/events", {
-        method: "GET",
-      });
+      try {
+        const res = await fetch("http://localhost:8080/api/sports", {
+          method: "GET",
+        });
 
-      if (res.ok) {
-        const apiData = await res.json();
-        const events = apiData.map(ev => ({
-          event_id: ev.event_id,
-          date: ev.date,
-          time: ev.time || "",
-          status: ev.status,
-          competition: ev.competition || "",
-          season: ev.season || "",
-          stage: ev.stage || "",
-          home: ev.home || "",
-          away: ev.away || "",
-          home_points: ev.result ? ev.result.home_points : null,
-          away_points: ev.result ? ev.result.away_points : null,
-          outcome: ev.outcome || "",
-          winner: ev.result ? ev.result.winner : ""
-        }));
-
-        loadCalendar(events);
-      } else {
-        const err = await res.json();
-        document.getElementById("errors").textContent = err.message;
+        if (res.ok) {
+          const sportsRes = await res.json();
+          document.getElementById("errors").textContent = "";
+          const availableSports = sportsRes.sports || [];
+          loadSportsFilter(availableSports);
+        } else {
+          const err = await res.json();
+          document.getElementById("errors").textContent = err.message;
+        }
+      } catch (e) {
+        document.getElementById("errors").textContent = e.message;
       }
     })();
+
+    loadEvents();
     </script>
   </body>
 </html>

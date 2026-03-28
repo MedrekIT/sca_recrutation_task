@@ -4,6 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"time"
+
+	"github.com/MedrekIT/sca-recrutation-task/server/internal/database"
 )
 
 type Result struct {
@@ -29,18 +32,44 @@ type Event struct {
 	Result Result `json:"result"`
 }
 
+func (cfg ApiConfig) getEventHandler(w http.ResponseWriter, r *http.Request) {
+}
+
 func (cfg ApiConfig) getEventsHandler(w http.ResponseWriter, r *http.Request) {
-	events, err := cfg.Db.GetEvents(r.Context())
+	filterQueries := r.URL.Query()
+
+	var dateFilter sql.NullTime
+	if filterQueries.Get("date") != "" {
+		dateQuery, err := time.Parse("2006-01-02", filterQueries.Get("date"))
+		if err != nil {
+			errorResponse(w, http.StatusBadRequest, []string{"INVALID_REQUEST", "Invalid date"}, fmt.Errorf("couldn't parse date from the URL query: %w", err))
+			return
+		}
+		dateFilter = sql.NullTime{
+			Time: dateQuery,
+			Valid: true,
+		}
+	}
+	var sportFilter *string
+	if filterQueries.Get("sport") != "" {
+		sportQuery := filterQueries.Get("sport")
+		sportFilter = &sportQuery
+	}
+	getEventsParams := database.GetEventsParams{
+		DateFilter:  dateFilter,
+		SportFilter: sportFilter,
+	}
+	events, err := cfg.Db.GetEvents(r.Context(), getEventsParams)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			successResponse(w, http.StatusOK, nil)
+			successResponse(w, http.StatusOK, []Event{})
 			return
 		}
 		errorResponse(w, http.StatusInternalServerError, []string{"DATABASE_ERROR", "Something went wrong"}, fmt.Errorf("couldn't get user from the database - %w", err))
 		return
 	}
 	if events == nil {
-		successResponse(w, http.StatusOK, nil)
+		successResponse(w, http.StatusOK, []Event{})
 		return
 	}
 

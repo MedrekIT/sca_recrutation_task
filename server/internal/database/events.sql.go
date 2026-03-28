@@ -34,15 +34,23 @@ FROM events e
 JOIN stages st ON e._stage_id = st.id
 JOIN editions ed ON st._edition_id = ed.id
 JOIN competitions c ON ed._competition_id = c.id
+JOIN sports s ON c._sport_id = s.id
 LEFT JOIN competitors hc ON e._home_competitor_id = hc.id
 LEFT JOIN competitors ac ON e._away_competitor_id = ac.id
 LEFT JOIN results r ON r._event_id = e.id
+
+WHERE ($1::date IS NULL OR e.venue_date = $1::date) AND ($2::text IS NULL OR s.name = $2::text)
 
 ORDER BY
   e.venue_date,
   e.venue_time,
   c.name
 `
+
+type GetEventsParams struct {
+	DateFilter  sql.NullTime
+	SportFilter *string
+}
 
 type GetEventsRow struct {
 	EventID        int32
@@ -60,8 +68,8 @@ type GetEventsRow struct {
 	ForfeitBy      *string
 }
 
-func (q *Queries) GetEvents(ctx context.Context) ([]GetEventsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getEvents)
+func (q *Queries) GetEvents(ctx context.Context, arg GetEventsParams) ([]GetEventsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getEvents, arg.DateFilter, arg.SportFilter)
 	if err != nil {
 		return nil, err
 	}
