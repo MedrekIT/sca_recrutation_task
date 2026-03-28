@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Sports events calendar</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="CSS/style.css"</link>
+  </head>
+  <body>
+    <div id="events-calendar"></div>
+    <p id="errors" style="color: red;"></p>
+    <script>
+    function loadCalendar(events) {
+      const groupedByDate = {};
+      events.forEach(ev => {
+        if (!groupedByDate[ev.date]) groupedByDate[ev.date] = [];
+        groupedByDate[ev.date].push(ev);
+      });
+
+      const table = document.getElementById("events-calendar");
+
+      Object.keys(groupedByDate).forEach(day => {
+        const dailyEvents = groupedByDate[day];
+
+        let trDay = document.createElement("tr");
+        trDay.classList.add("day");
+        let thDay = document.createElement("th");
+        thDay.colSpan = 5;
+        thDay.textContent = `${day}`;
+        trDay.appendChild(thDay);
+        table.appendChild(trDay);
+
+        const groupedByComp = {};
+        dailyEvents.forEach(ev => {
+          const key = `${ev.competition} ${ev.season} ${ev.stage}`;
+          if (!groupedByComp[key]) groupedByComp[key] = [];
+          groupedByComp[key].push(ev);
+        });
+
+        Object.keys(groupedByComp).forEach(key => {
+          const compEvents = groupedByComp[key];
+
+          let trComp = document.createElement("tr");
+          trComp.classList.add("competition");
+          let thComp = document.createElement("th");
+          thComp.colSpan = 5;
+          thComp.textContent = key;
+          trComp.appendChild(thComp);
+          table.appendChild(trComp);
+
+          compEvents.forEach(ev => {
+            let tr = document.createElement("tr");
+            /* tr.style.cursor = "pointer";
+            tr.addEventListener("click", () => {
+              window.location.href = `event.html?id=${ev.event_id}`
+            }); */
+
+            const tdTime = document.createElement("td");
+            tdTime.textContent = ev.time;
+            tr.appendChild(tdTime);
+
+            const tdHome = document.createElement("td");
+            tdHome.textContent = ev.home;
+            if (ev.winner === "home") tdHome.classList.add("winner");
+            tr.appendChild(tdHome);
+
+            const tdScore = document.createElement("td");
+            tdScore.classList.add("score");
+            if (ev.status === "scheduled" || ev.status === "postponed" || ev.status === "cancelled") tdScore.textContent = "-:-";
+              else tdScore.textContent = (ev.home_points != null && ev.away_points != null) ? `${ev.home_points} : ${ev.away_points}` : "-:-";
+            tr.appendChild(tdScore);
+
+            const tdAway = document.createElement("td");
+            tdAway.textContent = ev.away;
+            if (ev.winner === "away") tdAway.classList.add("winner");
+            tr.appendChild(tdAway);
+
+            const tdStatus = document.createElement("td");
+            tdStatus.textContent = ev.status.toUpperCase();
+            tdStatus.classList.add(`status-${ev.status}`);
+            tr.appendChild(tdStatus);
+
+            table.appendChild(tr);
+          });
+        });
+      });
+    }
+
+    (async () => {
+      const res = await fetch("http://localhost:8080/api/events", {
+        method: "GET",
+      });
+
+      if (res.ok) {
+        const apiData = await res.json();
+        const events = apiData.map(ev => ({
+          event_id: ev.event_id,
+          date: ev.date,
+          time: ev.time || "",
+          status: ev.status,
+          competition: ev.competition || "",
+          season: ev.season || "",
+          stage: ev.stage || "",
+          home: ev.home || "",
+          away: ev.away || "",
+          home_points: ev.result ? ev.result.home_points : null,
+          away_points: ev.result ? ev.result.away_points : null,
+          outcome: ev.outcome || "",
+          winner: ev.result ? ev.result.winner : ""
+        }));
+
+        loadCalendar(events);
+      } else {
+        const err = await res.json();
+        document.getElementById("errors").textContent = err.message;
+      }
+    })();
+    </script>
+  </body>
+</html>

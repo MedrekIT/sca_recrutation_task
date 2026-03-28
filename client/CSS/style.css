@@ -1,0 +1,50 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 20px;
+}
+td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+tr.day {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+tr.competition {
+  background-color: #e0e0e0;
+  & th {
+    font-weight: normal;
+  }
+}
+
+.status-finished {
+  color: green;
+  font-weight: bold;
+}
+
+.status-live {
+  color: orange;
+  font-weight: bold;
+}
+
+.status-scheduled {
+  color: gray;
+  font-weight: bold;
+}
+
+.winner {
+  background-color: #BDFFB3;
+  font-weight: bold;
+}
+
+.score {
+  font-weight: bold;
+}

@@ -3,7 +3,7 @@ CREATE TABLE events (
   id SERIAL PRIMARY KEY,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  status TEXT NOT NULL CHECK (status IN ('scheduled', 'played', 'live', 'cancelled', 'postponed')),
+  status TEXT NOT NULL CHECK (status IN ('scheduled', 'finished', 'live', 'cancelled', 'postponed')),
   _venue_id INT REFERENCES venues(id) ON DELETE SET NULL,
   venue_time TIME,
   venue_date DATE NOT NULL,

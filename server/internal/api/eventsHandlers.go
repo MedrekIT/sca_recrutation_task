@@ -19,12 +19,12 @@ type Event struct {
 	Time    *string `json:"time,omitempty"`
 	Status  string  `json:"status"`
 
-	CompName string `json:"comp_name"`
-	Season   string `json:"season"`
-	Stage    string `json:"stage"`
+	Competition string `json:"competition"`
+	Season      string `json:"season"`
+	Stage       string `json:"stage"`
 
-	HomeComp string `json:"home_comp"`
-	AwayComp string `json:"away_comp"`
+	Home string `json:"home"`
+	Away string `json:"away"`
 
 	Result Result `json:"result"`
 }
@@ -47,7 +47,7 @@ func (cfg ApiConfig) getEventsHandler(w http.ResponseWriter, r *http.Request) {
 	var eventsCalendar []Event
 	for _, ev := range events {
 		venueYear, venueMon, venueDay := ev.VenueDate.Date()
-		venueDate := fmt.Sprintf("%d-%d-%d", venueYear, venueMon, venueDay)
+		venueDate := fmt.Sprintf("%d/%02d/%02d", venueYear, venueMon, venueDay)
 		venueHour, venueMin, _ := ev.VenueTime.Time.Clock()
 		venueTime := fmt.Sprintf("%02d:%02d", venueHour, venueMin)
 
@@ -59,7 +59,9 @@ func (cfg ApiConfig) getEventsHandler(w http.ResponseWriter, r *http.Request) {
 				winner = "away"
 			}
 		}
+		status := ev.Status
 		if ev.Outcome != nil && *ev.Outcome != "" {
+			status = "finished"
 			if *ev.Outcome == "forfeit" {
 				if ev.ForfeitBy != nil && *ev.ForfeitBy == "home" {
 					winner = "away"
@@ -81,15 +83,15 @@ func (cfg ApiConfig) getEventsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		eventsCalendar = append(eventsCalendar, Event{
-			EventID:  ev.EventID,
-			Date:     venueDate,
-			Time:     &venueTime,
-			Status:   ev.Status,
-			CompName: ev.Competition,
-			Season:   ev.Season,
-			Stage:    ev.Stage,
-			HomeComp: homeComp,
-			AwayComp: awayComp,
+			EventID:     ev.EventID,
+			Date:        venueDate,
+			Time:        &venueTime,
+			Status:      status,
+			Competition: ev.Competition,
+			Season:      ev.Season,
+			Stage:       ev.Stage,
+			Home:        homeComp,
+			Away:        awayComp,
 			Result: Result{
 				HomePoints: ev.HomePoints.Int16,
 				AwayPoints: ev.AwayPoints.Int16,
