@@ -40,13 +40,14 @@ func main() {
 
 	cfg := api.ApiConfig{
 		Port: fmt.Sprintf(":%s", serverPort),
-		Db:   database.New(db),
+		Db:   db,
+		Q:    database.New(db),
 	}
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Content-Type"},
+		AllowedOrigins: []string{"http://localhost:3000"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowedHeaders: []string{"Content-Type"},
 	})
 
 	handler := c.Handler(api.Routes(cfg))

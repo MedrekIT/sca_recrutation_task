@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Create Event</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="CSS/style.css"</link>
+  </head>
+  <body>
+    <nav>
+      <a href="index.html">Calendar</a>
+    </nav>
+    <h1>Create event</h1>
+    <div id="form-container">
+      <p id="errors" style="color: red;"></p>
+      <form id="event-form"></form>
+    </div>
+    <script>
+    let sportsArr = [];
+    let competitionsArr = [];
+    let competitorsArr = [];
+    let stagesArr = [];
+    let venuesArr = [];
+    let sport = "";
+    let competition = 0;
+
+    function loadSportsForm() {
+      const eventForm = document.getElementById("event-form");
+      eventForm.innerHTML = "";
+
+      const sportLabel = document.createElement("label");
+      eventForm.appendChild(sportLabel);
+      sportLabel.innerHTML = `Sport<span style="color: red;">*</span>:
+      <select id="sport-select" required>
+        <option value="">Choose sport</option>
+      </select>`;
+
+      const sportsSelect = document.getElementById("sport-select")
+      sportsArr.forEach(sport => {
+        let sportOption = document.createElement("option");
+        sportsSelect.appendChild(sportOption);
+        sportOption.value = sport;
+        sportOption.textContent = sport;
+      })
+
+      const sportButton = document.createElement("button");
+      eventForm.appendChild(sportButton);
+      sportButton.id = "sport-button-next";
+      sportButton.type = "button";
+      sportButton.textContent = "Next";
+
+      const furtherForm = document.createElement("div");
+      eventForm.appendChild(furtherForm);
+      furtherForm.id = "further-form";
+
+      sportButton.addEventListener("click", () => {
+        document.getElementById("errors").textContent = "";
+        furtherForm.innerHTML = "";
+        sport = document.getElementById("sport-select").value
+        if (!sportsArr.includes(sport)) {
+          document.getElementById("errors").textContent = "Please, choose a correct sport!";
+          return;
+        }
+        loadComps(sport);
+      });
+    }
+
+    function loadCompsForm(sport) {
+      const furtherForm = document.getElementById("further-form");
+
+      const competitionFieldset = document.createElement("fieldset");
+      furtherForm.appendChild(competitionFieldset);
+      competitionFieldset.id = "competition-fieldset";
+
+      const competitionLegend = document.createElement("legend");
+      competitionFieldset.appendChild(competitionLegend);
+      competitionLegend.textContent = "Competition:";
+
+      const competitionLabel = document.createElement("label");
+      competitionFieldset.appendChild(competitionLabel);
+      competitionLabel.innerHTML = `Competition<span style="color: red;">*</span>:
+      <select id="competition-select" required>
+        <option value="">Choose competition</option>
+      </select>`;
+
+      const competitionsSelect = document.getElementById("competition-select")
+      competitionsArr.forEach(comp => {
+        let compOption = document.createElement("option");
+        competitionsSelect.appendChild(compOption);
+        compOption.value = comp.edition_id;
+        compOption.textContent = comp.label;
+      })
+
+      const compButton = document.createElement("button");
+      competitionFieldset.appendChild(compButton);
+      compButton.id = "comp-button-next";
+      compButton.type = "button";
+      compButton.textContent = "Next";
+      compButton.addEventListener("click", () => {
+        document.getElementById("errors").textContent = "";
+        competition = Number(document.getElementById("competition-select").value);
+        const exists = competitionsArr.some(c => c.edition_id === competition);
+        if (!exists) {
+          document.getElementById("errors").textContent = "Please, choose a correct competition!";
+          return;
+        }
+        loadStages(competition);
+      });
+    }
+
+    function loadFullForm() {
+      document.getElementById("comp-button-next").style.display = "none";
+      const furtherForm = document.getElementById("further-form");
+
+      const competitionFieldset = document.getElementById("competition-fieldset");
+
+      const stageLabel = document.createElement("label");
+      competitionFieldset.appendChild(stageLabel);
+      stageLabel.innerHTML = `Stage<span style="color: red;">*</span>:
+      <select id="stage-select" required>
+        <option value="">Choose stage</option>
+      </select>`;
+
+      const stagesSelect = document.getElementById("stage-select");
+      stagesArr.forEach(stage => {
+        let stageOption = document.createElement("option");
+        stagesSelect.appendChild(stageOption);
+        stageOption.value = stage.stage_id;
+        stageOption.textContent = stage.name;
+      });
+
+      const competitorsFieldset = document.createElement("fieldset");
+      furtherForm.appendChild(competitorsFieldset);
+
+      const competitorsLegend = document.createElement("legend");
+      competitorsFieldset.appendChild(competitorsLegend);
+      competitorsLegend.textContent = "Competitors:";
+
+      const homeLabel = document.createElement("label");
+      competitorsFieldset.appendChild(homeLabel);
+      homeLabel.innerHTML = `First competitor<span class="optional">(optional)</span>:
+      <select id="home-select">
+        <option value="">--None--</option>
+      </select>`;
+
+      const homeSelect = document.getElementById("home-select");
+      competitorsArr.forEach(homeComp => {
+        let homeOption = document.createElement("option");
+        homeSelect.appendChild(homeOption);
+        homeOption.value = homeComp;
+        homeOption.textContent = homeComp
+      });
+
+      const awayLabel = document.createElement("label");
+      competitorsFieldset.appendChild(awayLabel);
+      awayLabel.innerHTML = `Second competitor<span class="optional">(optional)</span>:
+      <select id="away-select">
+        <option value="">--None--</option>
+      </select>`;
+
+      const awaySelect = document.getElementById("away-select");
+      competitorsArr.forEach(awayComp => {
+        let awayOption = document.createElement("option");
+        awaySelect.appendChild(awayOption);
+        awayOption.value = awayComp;
+        awayOption.textContent = awayComp
+      });
+
+      const detailsFieldset = document.createElement("fieldset");
+      furtherForm.appendChild(detailsFieldset);
+
+      const detailsLegend = document.createElement("legend");
+      detailsFieldset.appendChild(detailsLegend);
+      detailsLegend.textContent = "Event details:";
+
+      const statusLabel = document.createElement("label");
+      detailsFieldset.appendChild(statusLabel);
+      statusLabel.innerHTML = `Status<span style="color: red;">*</span>:
+      <select id="status-select" required>
+        <option value="">Choose status</option>
+        <option value="scheduled">Scheduled</option>
+        <option value="finished">Finished</option>
+        <option value="live">Live</option>
+        <option value="cancelled">Cancelled</option>
+        <option value="postponed">Postponed</option>
+      </select>`;
+
+      const dateLabel = document.createElement("label");
+      detailsFieldset.appendChild(dateLabel);
+      dateLabel.innerHTML = `Date<span style="color: red;">*</span>:
+      <input type="date" id="venue-date" required>`;
+
+      const timeLabel = document.createElement("label");
+      detailsFieldset.appendChild(timeLabel);
+      timeLabel.innerHTML = `Time <span class="optional">(optional)</span>:
+      <input type="time" id="venue-time">`;
+
+      const venueLabel = document.createElement("label");
+      detailsFieldset.appendChild(venueLabel);
+      venueLabel.innerHTML = `Venue<span class="optional">(optional)</span>:
+      <select id="venue-select">
+        <option value="">--None--</option>
+      </select>`;
+
+      const venueSelect = document.getElementById("venue-select");
+      venuesArr.forEach(venue => {
+        let venueOption = document.createElement("option");
+        venueSelect.appendChild(venueOption);
+        venueOption.value = venue.id;
+        venueOption.textContent = venue.name;
+      });
+
+      const eventDetailsLabel = document.createElement("label");
+      detailsFieldset.appendChild(eventDetailsLabel);
+      eventDetailsLabel.innerHTML = `Details <span class="optional">(optional)</span>:
+      <textarea id="event-details" rows="3"></textarea>`;
+
+      const resultFieldset = document.createElement("fieldset");
+      furtherForm.appendChild(resultFieldset);
+      resultFieldset.id = "result-fieldset";
+      resultFieldset.style.display = "none";
+
+      const resultLegend = document.createElement("legend");
+      resultFieldset.appendChild(resultLegend);
+      resultLegend.textContent = "Result:";
+
+      const homePointsLabel = document.createElement("label");
+      resultFieldset.appendChild(homePointsLabel);
+      homePointsLabel.innerHTML = `Home points<span style="color: red;">*</span>:
+      <input type="number" id="home-points" value="0" min="0">`;
+
+      const awayPointsLabel = document.createElement("label");
+      resultFieldset.appendChild(awayPointsLabel);
+      awayPointsLabel.innerHTML = `Away points<span style="color: red;">*</span>:
+      <input type="number" id="away-points" value="0" min="0">`;
+
+      const outcomeLabel = document.createElement("label");
+      resultFieldset.appendChild(outcomeLabel);
+      outcomeLabel.innerHTML = `Outcome <span class="optional">(optional)</span>:
+      <select id="outcome-select">
+        <option value="">--None--</option>
+        <option value="no_contest">No contest</option>
+        <option value="forfeit">Forfeit</option>
+      </select>`;
+
+      const forfeitByLabel = document.createElement("label");
+      resultFieldset.appendChild(forfeitByLabel);
+      forfeitByLabel.id = "forfeit-by-label";
+      forfeitByLabel.style.display = "none";
+      forfeitByLabel.innerHTML = `Forfeit by<span style="color: red;">*</span>:
+      <select id="forfeit-by-select">
+        <option value="">Choose side</option>
+        <option value="home">First competitor</option>
+        <option value="away">Second competitor</option>
+      </select>`;
+
+      const resultDetailsLabel = document.createElement("label");
+      resultFieldset.appendChild(resultDetailsLabel);
+      resultDetailsLabel.innerHTML = `Result details <span class="optional">(optional)</span>:
+      <textarea id="result-details" rows="3"></textarea>`;
+
+      document.getElementById("status-select").addEventListener("change", (e) => {
+        const show = ["finished", "live"].includes(e.target.value);
+        document.getElementById("result-fieldset").style.display = show ? "" : "none";
+      });
+
+      document.getElementById("outcome-select").addEventListener("change", (e) => {
+        const isForfeit = e.target.value === "forfeit";
+        document.getElementById("forfeit-by-label").style.display = isForfeit ? "" : "none";
+        if (!isForfeit) {
+          document.getElementById("forfeit-by-select").value = "";
+        }
+      });
+
+      const submitButton = document.createElement("button");
+      furtherForm.appendChild(submitButton);
+      submitButton.type = "button";
+      submitButton.textContent = "Create event";
+      submitButton.addEventListener("click", submitEvent);
+    }
+
+    async function submitEvent() {
+      console.log("eo");
+      document.getElementById("errors").textContent = "";
+
+      const stageID = Number(document.getElementById("stage-select").value);
+      if (!stageID) {
+        document.getElementById("errors").textContent = "Please choose a stage!";
+        return;
+      }
+
+      const status = document.getElementById("status-select").value;
+      if (!status) {
+        document.getElementById("errors").textContent = "Please choose a status!";
+        return;
+      }
+
+      const venueDateRaw = document.getElementById("venue-date").value;
+      if (!venueDateRaw) {
+        document.getElementById("errors").textContent = "Please provide a date!";
+        return;
+      }
+
+      const homeName = document.getElementById("home-select").value || null;
+      const awayName = document.getElementById("away-select").value || null;
+      if (homeName && awayName && homeName === awayName) {
+        document.getElementById("errors").textContent = "Home and away competitors must be different!";
+        return;
+      }
+      const venueDate = new Date(venueDateRaw + "T00:00:00Z").toISOString();
+
+      const venueTimeRaw = document.getElementById("venue-time").value;
+      let venueTime = null;
+      if (venueTimeRaw) {
+        venueTime = new Date(venueDateRaw + "T" + venueTimeRaw + ":00Z").toISOString();
+      }
+
+      const venueID = Number(document.getElementById("venue-select").value) || null;
+      const eventDetails = document.getElementById("event-details").value.trim() || null;
+
+      console.log(status);
+
+      const reqBody = {
+        status,
+        venue_date: venueDate,
+        stage_id: stageID,
+      };
+
+      if (venueTime !== null) reqBody.venue_time = venueTime;
+      if (venueID !== null)   reqBody.venue_id   = venueID;
+      if (homeName !== null)  reqBody.home_name  = homeName;
+      if (awayName !== null)  reqBody.away_name  = awayName;
+      if (eventDetails)       reqBody.details    = eventDetails;
+
+      if (["finished", "live"].includes(status)) {
+        const homePoints = Number(document.getElementById("home-points").value);
+        const awayPoints = Number(document.getElementById("away-points").value);
+        const outcome    = document.getElementById("outcome-select").value || null;
+        const forfeitBy  = document.getElementById("forfeit-by-select").value || null;
+        const resultDetails = document.getElementById("result-details").value.trim() || null;
+
+        if (outcome === "forfeit" && !forfeitBy) {
+          document.getElementById("errors").textContent = "Please choose which side forfeited!";
+          return;
+        }
+
+        reqBody.result = {
+          home_points: homePoints,
+          away_points: awayPoints,
+          winner: "",
+        };
+        if (outcome !== null) reqBody.result.outcome = outcome;
+        if (forfeitBy !== null) reqBody.result.forfeit_by = forfeitBy;
+        if (resultDetails) reqBody.result.result_details = resultDetails;
+      }
+
+      try {
+        const res = await fetch("http://localhost:8080/api/events", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(reqBody),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          window.location.href = `event.html?id=${data.event_id}`;
+        } else {
+          const err = await res.json();
+          document.getElementById("errors").textContent = err.message;
+        }
+      } catch (e) {
+        document.getElementById("errors").textContent = e.message;
+      }
+    }
+
+    async function loadStages(competition) {
+      try {
+        const res = await fetch(`http://localhost:8080/api/competitions/${encodeURIComponent(competition)}/stages`, {
+          method: "GET",
+        });
+
+        if (res.ok) {
+          document.getElementById("errors").textContent = "";
+          stagesArr = await res.json() || [];
+          if (stagesArr.length === 0) {
+            document.getElementById("errors").textContent = "No stages available for this competition! Please, add some stages first";
+            return;
+          }
+          loadFullForm();
+        } else {
+          const err = await res.json();
+          document.getElementById("errors").textContent += err.message;
+        }
+      } catch (e) {
+        document.getElementById("errors").textContent = e.message;
+      }
+    }
+
+    async function loadComps(sport) {
+      try {
+        const [competitionsRes, competitorsRes, venuesRes] = await Promise.all([
+          fetch(`http://localhost:8080/api/sports/${encodeURIComponent(sport)}/competitions`),
+          fetch(`http://localhost:8080/api/sports/${encodeURIComponent(sport)}/competitors`),
+          fetch(`http://localhost:8080/api/sports/${encodeURIComponent(sport)}/venues`),
+        ]);
+
+        if (competitionsRes.ok && competitorsRes.ok && venuesRes.ok) {
+          document.getElementById("errors").textContent = "";
+          competitionsArr = await competitionsRes.json() || [];
+          competitorsArr = await competitorsRes.json() || [];
+          venuesArr = await venuesRes.json() || [];
+          const messages = [
+            competitionsArr.length === 0 ? "No competitions available! Please, add some competitions first" : null,
+            competitorsArr.length === 0 ? "No competitors available! Please, add some competitors first" : null,
+            venuesArr.length === 0 ? "No venues available! Please, add some venues first" : null,
+          ];
+          if (competitionsArr.length === 0 || competitorsArr.length === 0 || venuesArr.length === 0) {
+            document.getElementById("errors").textContent = messages.filter(Boolean).join(" ");
+            return;
+          }
+          loadCompsForm();
+        } else {
+          const messages = await Promise.all([
+            !competitionsRes.ok ? competitionsRes.json().then(e => e.message) : null,
+            !competitorsRes.ok ? competitorsRes.json().then(e => e.message) : null,
+            !venuesRes.ok ? venuesRes.json().then(e => e.message) : null,
+          ]);
+          document.getElementById("errors").textContent = messages.filter(Boolean).join(" ");
+        }
+      } catch (e) {
+        document.getElementById("errors").textContent = e.message;
+      }
+    }
+
+
+    (async () => {
+      try {
+        const res = await fetch("http://localhost:8080/api/sports", {
+          method: "GET",
+        });
+
+        if (res.ok) {
+          document.getElementById("errors").textContent = "";
+          sportsArr = await res.json() || [];
+          if (sportsArr.length === 0) {
+            document.getElementById("errors").textContent = "No sports available! Please, add some sports first";
+          }
+          loadSportsForm();
+        } else {
+          const err = await res.json();
+          document.getElementById("errors").textContent = err.message;
+        }
+      } catch (e) {
+        document.getElementById("errors").textContent = e.message;
+      }
+    })();
+    </script>
+  </body>
+</html>

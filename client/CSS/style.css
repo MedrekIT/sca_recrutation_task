@@ -2,6 +2,26 @@ body {
   font-family: Arial, sans-serif;
 }
 
+td {
+  border: 1px solid #CFCFCF;
+  padding: 8px;
+  text-align: center;
+}
+tr.day {
+  background-color: #F0F0F0;
+  font-weight: bold;
+}
+tr.competition {
+  background-color: #E0E0E0;
+  & th {
+    font-weight: normal;
+  }
+}
+
+button, input, select {
+  cursor: pointer;
+}
+
 #events-container {
   width: 45%;
   margin: auto;
@@ -23,27 +43,6 @@ body {
   }
 }
 
-td {
-  border: 1px solid #CFCFCF;
-  padding: 8px;
-  text-align: center;
-}
-tr.day {
-  background-color: #F0F0F0;
-  font-weight: bold;
-}
-
-tr.competition {
-  background-color: #E0E0E0;
-  & th {
-    font-weight: normal;
-  }
-}
-
-button, input, select {
-  cursor: pointer;
-}
-
 #filters {
   position: absolute;
   flex-direction: column;
@@ -62,6 +61,10 @@ button, input, select {
   text-align: center;
   font-weight: bold;
   font-size: 200%
+}
+
+.optional {
+  color: gray;
 }
 
 .status-finished {

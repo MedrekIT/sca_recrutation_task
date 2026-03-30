@@ -8,6 +8,7 @@
   </head>
   <body>
     <nav>
+      <a href="createEvent.html">Create new event</a>
     </nav>
     <div id="events-container">
       <button id="filter-toggle">Filters</button>
@@ -182,7 +183,7 @@
         if (res.ok) {
           const sportsRes = await res.json();
           document.getElementById("errors").textContent = "";
-          const availableSports = sportsRes.sports || [];
+          const availableSports = sportsRes || [];
           loadSportsFilter(availableSports);
         } else {
           const err = await res.json();

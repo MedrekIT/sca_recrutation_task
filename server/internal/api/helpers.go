@@ -6,6 +6,24 @@ import (
 	"time"
 )
 
+var availableOutcomes = []string{
+	"no contest",
+	"forfeit",
+}
+
+var availableForfeiters = []string{
+	"home",
+	"away",
+}
+
+var availableStatus = []string{
+	"scheduled",
+	"finished",
+	"live",
+	"cancelled",
+	"postponed",
+}
+
 func formatDateTime(dbDate time.Time, dbTime *time.Time) (string, *string) {
 	venueYear, venueMon, venueDay := dbDate.Date()
 	venueDate := fmt.Sprintf("%d/%02d/%02d", venueYear, venueMon, venueDay)

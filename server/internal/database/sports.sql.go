@@ -10,7 +10,7 @@ import (
 )
 
 const getSports = `-- name: GetSports :many
-SELECT sports.name FROM sports
+SELECT name FROM sports
 `
 
 func (q *Queries) GetSports(ctx context.Context) ([]string, error) {

@@ -11,6 +11,70 @@ import (
 	"time"
 )
 
+const createEvent = `-- name: CreateEvent :one
+INSERT INTO events (status, venue_date, venue_time, _venue_id, _home_competitor_id, _away_competitor_id, _stage_id, details)
+VALUES (
+  $1,
+  $2,
+  $3,
+  $4,
+  $5,
+  $6,
+  $7,
+  $8
+)
+RETURNING id
+`
+
+type CreateEventParams struct {
+	Status           string
+	VenueDate        time.Time
+	VenueTime        *time.Time
+	VenueID          sql.NullInt32
+	HomeCompetitorID sql.NullInt32
+	AwayCompetitorID sql.NullInt32
+	StageID          int32
+	Details          *string
+}
+
+func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, createEvent,
+		arg.Status,
+		arg.VenueDate,
+		arg.VenueTime,
+		arg.VenueID,
+		arg.HomeCompetitorID,
+		arg.AwayCompetitorID,
+		arg.StageID,
+		arg.Details,
+	)
+	var id int32
+	err := row.Scan(&id)
+	return id, err
+}
+
+const getEventByConstraint = `-- name: GetEventByConstraint :exec
+SELECT id, created_at, updated_at, status, venue_date, venue_time, _venue_id, _home_competitor_id, _away_competitor_id, _stage_id, details FROM events
+WHERE venue_date = $1 AND _stage_id = $2 AND _home_competitor_id = $3 AND _away_competitor_id = $4
+`
+
+type GetEventByConstraintParams struct {
+	VenueDate        time.Time
+	StageID          int32
+	HomeCompetitorID sql.NullInt32
+	AwayCompetitorID sql.NullInt32
+}
+
+func (q *Queries) GetEventByConstraint(ctx context.Context, arg GetEventByConstraintParams) error {
+	_, err := q.db.ExecContext(ctx, getEventByConstraint,
+		arg.VenueDate,
+		arg.StageID,
+		arg.HomeCompetitorID,
+		arg.AwayCompetitorID,
+	)
+	return err
+}
+
 const getEventByID = `-- name: GetEventByID :one
 SELECT
   e.venue_date,
@@ -18,7 +82,7 @@ SELECT
   e.status,
   e.details AS event_details,
 
-  v.country_code,
+  v._country,
   v.city,
   v.name AS place_name,
 
@@ -26,9 +90,9 @@ SELECT
   ed.season,
   st.name AS stage,
 
-  hc.country_code AS home_country,
+  hc._country AS home_country,
   hc.name AS home_competitor,
-  ac.country_code AS away_country,
+  ac._country AS away_country,
   ac.name AS away_competitor,
 
   r.home_points,
@@ -54,7 +118,7 @@ type GetEventByIDRow struct {
 	VenueTime      *time.Time
 	Status         string
 	EventDetails   *string
-	CountryCode    *string
+	Country        *string
 	City           *string
 	PlaceName      *string
 	Competition    string
@@ -79,7 +143,7 @@ func (q *Queries) GetEventByID(ctx context.Context, id int32) (GetEventByIDRow, 
 		&i.VenueTime,
 		&i.Status,
 		&i.EventDetails,
-		&i.CountryCode,
+		&i.Country,
 		&i.City,
 		&i.PlaceName,
 		&i.Competition,

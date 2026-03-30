@@ -18,12 +18,19 @@ type Competition struct {
 }
 
 type Competitor struct {
-	ID          int32
+	ID        int32
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Name      string
+	Country   *string
+	SportID   int32
+}
+
+type Country struct {
+	CountryCode string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	Name        string
-	CountryCode *string
-	SportID     int32
 }
 
 type Edition struct {
@@ -39,9 +46,9 @@ type Event struct {
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 	Status           string
-	VenueID          sql.NullInt32
-	VenueTime        *time.Time
 	VenueDate        time.Time
+	VenueTime        *time.Time
+	VenueID          sql.NullInt32
 	HomeCompetitorID sql.NullInt32
 	AwayCompetitorID sql.NullInt32
 	StageID          int32
@@ -76,10 +83,11 @@ type Stage struct {
 }
 
 type Venue struct {
-	ID          int32
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	Name        string
-	City        *string
-	CountryCode *string
+	ID        int32
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Name      string
+	City      *string
+	Country   *string
+	SportID   int32
 }

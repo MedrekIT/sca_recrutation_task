@@ -1,2 +1,2 @@
 -- name: GetSports :many
-SELECT sports.name FROM sports;
+SELECT name FROM sports;

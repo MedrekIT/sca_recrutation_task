@@ -1,3 +1,21 @@
+-- name: CreateEvent :one
+INSERT INTO events (status, venue_date, venue_time, _venue_id, _home_competitor_id, _away_competitor_id, _stage_id, details)
+VALUES (
+  $1,
+  $2,
+  $3,
+  $4,
+  $5,
+  $6,
+  $7,
+  $8
+)
+RETURNING id;
+
+-- name: GetEventByConstraint :exec
+SELECT * FROM events
+WHERE venue_date = $1 AND _stage_id = $2 AND _home_competitor_id = $3 AND _away_competitor_id = $4;
+
 -- name: GetEventByID :one
 SELECT
   e.venue_date,
@@ -5,7 +23,7 @@ SELECT
   e.status,
   e.details AS event_details,
 
-  v.country_code,
+  v._country,
   v.city,
   v.name AS place_name,
 
@@ -13,9 +31,9 @@ SELECT
   ed.season,
   st.name AS stage,
 
-  hc.country_code AS home_country,
+  hc._country AS home_country,
   hc.name AS home_competitor,
-  ac.country_code AS away_country,
+  ac._country AS away_country,
   ac.name AS away_competitor,
 
   r.home_points,
