@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Sports events calendar</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="CSS/style.css"</link>
+    <style>
+    </style>
+  </head>
+  <body>
+    <nav>
+    </nav>
+    <div id="event-container">
+      <a href="index.html">Back to calendar</a>
+      <p id="errors" style="color: red;"></p>
+      <div id="event-data"></div>
+    </div>
+    <script>
+    async function loadEvent(ev) {
+      const result = ev.result
+      const venue = ev.venue
+
+      const eventContainer = document.getElementById("event-data")
+
+      const competition = document.createElement("h1");
+      competition.textContent = `${ev.competition} ${ev.season} ${ev.stage}`;
+      competition.id = "competition"
+      eventContainer.appendChild(competition);
+
+      const venueElement = document.createElement("p");
+      const venueParts = []
+      if (venue) {
+        if (venue.country_code) venueParts.push(venue.country_code);
+        if (venue.city) venueParts.push(venue.city);
+        if (venue.place) venueParts.push(venue.place);
+      }
+      venueElement.textContent = `${ev.date} ${ev.time} ${venueParts.length ? " | " + venueParts.join(" ") : ""}`;
+      venueElement.id = "venue"
+      eventContainer.appendChild(venueElement);
+
+      if (ev.event_details) {
+        const eventDetails = document.createElement("p");
+        eventDetails.textContent = ev.event_details;
+        eventContainer.appendChild(eventDetails);
+      }
+
+      const table = document.createElement("table");
+
+      const tr = document.createElement("tr");
+
+      const tdHome = document.createElement("td");
+      tdHome.textContent = ev.home;
+      if (result.winner === "home") tdHome.classList.add("winner");
+      tr.appendChild(tdHome);
+
+      const tdScore = document.createElement("td");
+      tdScore.classList.add("score");
+      if (ev.status === "scheduled" || ev.status === "postponed" || ev.status === "cancelled") tdScore.textContent = "-:-";
+        else tdScore.textContent = `${result.home_points} : ${result.away_points}`;
+      tr.appendChild(tdScore);
+
+      const tdAway = document.createElement("td");
+      tdAway.textContent = ev.away;
+      if (result.winner === "away") tdAway.classList.add("winner");
+      tr.appendChild(tdAway);
+
+      table.appendChild(tr);
+      eventContainer.appendChild(table);
+
+      const statusElement = document.createElement("p");
+      statusElement.innerHTML = `Status: <span class="status-${ev.status}">${ev.status.toUpperCase()}</span>`;
+      eventContainer.appendChild(statusElement);
+
+      if (result.outcome) {
+        const outcomeElement = document.createElement("p");
+        outcomeElement.innerHTML = `Outcome: <span class="outcome">${result.outcome.toUpperCase()}</span>`;
+        eventContainer.appendChild(outcomeElement);
+      }
+
+      if (result.result_details) {
+        const resultDetails = document.createElement("p");
+        resultDetails.textContent = result.result_details;
+        eventContainer.appendChild(resultDetails);
+      }
+    }
+
+    (async () => {
+      try {
+        document.getElementById("event-data").innerHTML = "";
+        const params = new URLSearchParams(window.location.search);
+        const eventId = params.get("id");
+
+        if (!eventId) {
+          document.getElementById("errors").textContent = "No event ID in the URL";
+          return;
+        }
+        const res = await fetch(`http://localhost:8080/api/events/${eventId}`, {
+          method: "GET",
+        });
+
+        if (res.ok) {
+          const ev = await res.json();
+          const event = {
+            date: ev.date,
+            time: ev.time || "TBA",
+            venue: ev.venue ? {
+              country_code: ev.venue.country_code ? ev.venue.country_code : null,
+              city: ev.venue.city ? ev.venue.city : null,
+              place: ev.venue.place ? ev.venue.place : null,
+            } : null,
+            status: ev.status,
+            competition: ev.competition,
+            season: ev.season,
+            stage: ev.stage,
+            home_country: ev.home_country || null,
+            home: ev.home || "TBA",
+            away_country: ev.away_country || null,
+            away: ev.away || "TBA",
+            result: ev.result,
+            event_details: ev.event_details || null
+          };
+          document.getElementById("errors").textContent = "";
+          loadEvent(event);
+        } else {
+          const err = await res.json();
+          document.getElementById("errors").textContent = err.message;
+        }
+      } catch (e) {
+        document.getElementById("errors").textContent = e.message;
+      }
+    })();
+    </script>
+  </body>
+</html>

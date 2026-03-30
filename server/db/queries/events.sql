@@ -1,3 +1,40 @@
+-- name: GetEventByID :one
+SELECT
+  e.venue_date,
+  e.venue_time,
+  e.status,
+  e.details AS event_details,
+
+  v.country_code,
+  v.city,
+  v.name AS place_name,
+
+  c.name AS competition,
+  ed.season,
+  st.name AS stage,
+
+  hc.country_code AS home_country,
+  hc.name AS home_competitor,
+  ac.country_code AS away_country,
+  ac.name AS away_competitor,
+
+  r.home_points,
+  r.away_points,
+  r.outcome,
+  r.forfeit_by,
+  r.details AS result_details
+
+FROM events e
+JOIN stages st ON e._stage_id = st.id
+JOIN editions ed ON st._edition_id = ed.id
+JOIN competitions c ON ed._competition_id = c.id
+LEFT JOIN venues v ON e._venue_id = v.id
+LEFT JOIN competitors hc ON e._home_competitor_id = hc.id
+LEFT JOIN competitors ac ON e._away_competitor_id = ac.id
+LEFT JOIN results r ON r._event_id = e.id
+
+WHERE e.id = $1;
+
 -- name: GetEvents :many
 SELECT
   e.id AS event_id,

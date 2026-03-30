@@ -9,21 +9,21 @@
   <body>
     <nav>
     </nav>
-    <button id="filter-toggle">Filters</button>
-    <div id="filters" style="display: none;">
-      <label>Date:
-        <input type="date" id="date-filter">
-      </label>
-      <label>Sport:
-        <select id="sport-filter">
-          <option value="">Choose sport</option>
-        </select>
-      </label>
-      <button id="filter-button">Filter</button>
-    </div>
-    <p id="errors" style="color: red;"></p>
     <div id="events-container">
+      <button id="filter-toggle">Filters</button>
+      <div id="filters" style="display: none;">
+        <label>Date:
+          <input type="date" id="date-filter">
+        </label>
+        <label>Sport:
+          <select id="sport-filter">
+            <option value="">Choose sport</option>
+          </select>
+        </label>
+        <button id="filter-button">Filter</button>
+      </div>
       <table id="events-calendar"></table>
+      <p id="errors" style="color: red;"></p>
     </div>
     <script>
     function loadCalendar(events) {
@@ -67,10 +67,10 @@
 
           compEvents.forEach(ev => {
             let tr = document.createElement("tr");
-            /* tr.style.cursor = "pointer";
+            tr.style.cursor = "pointer";
             tr.addEventListener("click", () => {
               window.location.href = `event.html?id=${ev.event_id}`
-            }); */
+            });
 
             const tdTime = document.createElement("td");
             tdTime.textContent = ev.time;
@@ -78,18 +78,18 @@
 
             const tdHome = document.createElement("td");
             tdHome.textContent = ev.home;
-            if (ev.winner === "home") tdHome.classList.add("winner");
+            if (ev.result.winner === "home") tdHome.classList.add("winner");
             tr.appendChild(tdHome);
 
             const tdScore = document.createElement("td");
             tdScore.classList.add("score");
             if (ev.status === "scheduled" || ev.status === "postponed" || ev.status === "cancelled") tdScore.textContent = "-:-";
-              else tdScore.textContent = (ev.home_points != null && ev.away_points != null) ? `${ev.home_points} : ${ev.away_points}` : "-:-";
+              else tdScore.textContent = `${ev.result.home_points} : ${ev.result.away_points}`;
             tr.appendChild(tdScore);
 
             const tdAway = document.createElement("td");
             tdAway.textContent = ev.away;
-            if (ev.winner === "away") tdAway.classList.add("winner");
+            if (ev.result.winner === "away") tdAway.classList.add("winner");
             tr.appendChild(tdAway);
 
             const tdStatus = document.createElement("td");
@@ -152,17 +152,14 @@
           const events = apiData.map(ev => ({
             event_id: ev.event_id,
             date: ev.date,
-            time: ev.time || "",
+            time: ev.time || "TBA",
             status: ev.status,
-            competition: ev.competition || "",
-            season: ev.season || "",
-            stage: ev.stage || "",
-            home: ev.home || "",
-            away: ev.away || "",
-            home_points: ev.result ? ev.result.home_points : null,
-            away_points: ev.result ? ev.result.away_points : null,
-            outcome: ev.outcome || "",
-            winner: ev.result ? ev.result.winner : ""
+            competition: ev.competition,
+            season: ev.season,
+            stage: ev.stage,
+            home: ev.home || "TBA",
+            away: ev.away || "TBA",
+            result: ev.result
           }));
 
           document.getElementById("errors").textContent = "";

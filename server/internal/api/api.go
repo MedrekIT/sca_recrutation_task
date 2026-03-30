@@ -14,6 +14,7 @@ type ApiConfig struct {
 func Routes(cfg ApiConfig) http.Handler {
 	mu := http.NewServeMux()
 
+	mu.HandleFunc("GET /api/events/{eventID}", cfg.getEventHandler)
 	mu.HandleFunc("GET /api/events", cfg.getEventsHandler)
 	mu.HandleFunc("GET /api/sports", cfg.getSportsHandler)
 

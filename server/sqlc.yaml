@@ -12,3 +12,15 @@ sql:
             go_type:
               type: "string"
               pointer: true
+
+          - db_type: "pg_catalog.bpchar"
+            nullable: true
+            go_type:
+              type: "string"
+              pointer: true
+
+          - db_type: "pg_catalog.time"
+            nullable: true
+            go_type:
+              type: "time.Time"
+              pointer: true

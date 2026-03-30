@@ -5,8 +5,7 @@ CREATE TABLE venues (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   name TEXT NOT NULL,
   city TEXT,
-  country_code CHAR(3),
-  capacity INT CHECK (capacity > 0)
+  country_code CHAR(3)
 );
 
 -- +goose Down

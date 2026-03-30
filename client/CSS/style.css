@@ -1,15 +1,30 @@
 body {
   font-family: Arial, sans-serif;
-  padding: 20px;
 }
 
-table {
-  border-collapse: collapse;
-  width: 100%;
-  margin-bottom: 20px;
+#events-container {
+  width: 45%;
+  margin: auto;
+  & table {
+    border-collapse: collapse;
+    margin: 20px auto;
+    table-layout: fixed;
+  }
 }
+
+#event-container {
+  width: 40%;
+  margin: auto;
+  & table {
+    border-collapse: collapse;
+    width: 80%;
+    margin: 20px auto;
+    table-layout: fixed;
+  }
+}
+
 td {
-  border: 1px solid #CCC;
+  border: 1px solid #CFCFCF;
   padding: 8px;
   text-align: center;
 }
@@ -25,18 +40,28 @@ tr.competition {
   }
 }
 
+button, input, select {
+  cursor: pointer;
+}
+
 #filters {
   position: absolute;
   flex-direction: column;
   gap: 5px;
   margin-bottom: 20px;
   padding: 10px;
-  border: 1px solid #CCC;
-  background-color: #F9F9F9;
+  border: 1px solid #CFCFCF;
+  background-color: #F0F0F0;
   & button {
     align-self: center;
     width: 40%;
   }
+}
+
+#errors {
+  text-align: center;
+  font-weight: bold;
+  font-size: 200%
 }
 
 .status-finished {
@@ -60,5 +85,10 @@ tr.competition {
 }
 
 .score {
+  font-weight: bold;
+  font-size: 150%;
+}
+
+.outcome {
   font-weight: bold;
 }

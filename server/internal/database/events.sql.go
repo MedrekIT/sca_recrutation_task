@@ -11,6 +11,93 @@ import (
 	"time"
 )
 
+const getEventByID = `-- name: GetEventByID :one
+SELECT
+  e.venue_date,
+  e.venue_time,
+  e.status,
+  e.details AS event_details,
+
+  v.country_code,
+  v.city,
+  v.name AS place_name,
+
+  c.name AS competition,
+  ed.season,
+  st.name AS stage,
+
+  hc.country_code AS home_country,
+  hc.name AS home_competitor,
+  ac.country_code AS away_country,
+  ac.name AS away_competitor,
+
+  r.home_points,
+  r.away_points,
+  r.outcome,
+  r.forfeit_by,
+  r.details AS result_details
+
+FROM events e
+JOIN stages st ON e._stage_id = st.id
+JOIN editions ed ON st._edition_id = ed.id
+JOIN competitions c ON ed._competition_id = c.id
+LEFT JOIN venues v ON e._venue_id = v.id
+LEFT JOIN competitors hc ON e._home_competitor_id = hc.id
+LEFT JOIN competitors ac ON e._away_competitor_id = ac.id
+LEFT JOIN results r ON r._event_id = e.id
+
+WHERE e.id = $1
+`
+
+type GetEventByIDRow struct {
+	VenueDate      time.Time
+	VenueTime      *time.Time
+	Status         string
+	EventDetails   *string
+	CountryCode    *string
+	City           *string
+	PlaceName      *string
+	Competition    string
+	Season         string
+	Stage          string
+	HomeCountry    *string
+	HomeCompetitor *string
+	AwayCountry    *string
+	AwayCompetitor *string
+	HomePoints     sql.NullInt16
+	AwayPoints     sql.NullInt16
+	Outcome        *string
+	ForfeitBy      *string
+	ResultDetails  *string
+}
+
+func (q *Queries) GetEventByID(ctx context.Context, id int32) (GetEventByIDRow, error) {
+	row := q.db.QueryRowContext(ctx, getEventByID, id)
+	var i GetEventByIDRow
+	err := row.Scan(
+		&i.VenueDate,
+		&i.VenueTime,
+		&i.Status,
+		&i.EventDetails,
+		&i.CountryCode,
+		&i.City,
+		&i.PlaceName,
+		&i.Competition,
+		&i.Season,
+		&i.Stage,
+		&i.HomeCountry,
+		&i.HomeCompetitor,
+		&i.AwayCountry,
+		&i.AwayCompetitor,
+		&i.HomePoints,
+		&i.AwayPoints,
+		&i.Outcome,
+		&i.ForfeitBy,
+		&i.ResultDetails,
+	)
+	return i, err
+}
+
 const getEvents = `-- name: GetEvents :many
 SELECT
   e.id AS event_id,
@@ -55,7 +142,7 @@ type GetEventsParams struct {
 type GetEventsRow struct {
 	EventID        int32
 	VenueDate      time.Time
-	VenueTime      sql.NullTime
+	VenueTime      *time.Time
 	Status         string
 	Competition    string
 	Season         string

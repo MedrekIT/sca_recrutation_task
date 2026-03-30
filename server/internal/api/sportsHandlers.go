@@ -17,7 +17,7 @@ func (cfg ApiConfig) getSportsHandler(w http.ResponseWriter, r *http.Request) {
 			})
 			return
 		}
-		errorResponse(w, http.StatusInternalServerError, []string{"DATABASE_ERROR", "Something went wrong"}, fmt.Errorf("couldn't get user from the database - %w", err))
+		errorResponse(w, http.StatusInternalServerError, []string{"DATABASE_ERROR", "Something went wrong"}, fmt.Errorf("could not get sport from the database - %w", err))
 		return
 	}
 

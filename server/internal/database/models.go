@@ -22,8 +22,7 @@ type Competitor struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	Name        string
-	CountryCode sql.NullString
-	Type        string
+	CountryCode *string
 	SportID     int32
 }
 
@@ -41,12 +40,11 @@ type Event struct {
 	UpdatedAt        time.Time
 	Status           string
 	VenueID          sql.NullInt32
-	VenueTime        sql.NullTime
+	VenueTime        *time.Time
 	VenueDate        time.Time
 	HomeCompetitorID sql.NullInt32
 	AwayCompetitorID sql.NullInt32
 	StageID          int32
-	GroupName        *string
 	Details          *string
 }
 
@@ -83,6 +81,5 @@ type Venue struct {
 	UpdatedAt   time.Time
 	Name        string
 	City        *string
-	CountryCode sql.NullString
-	Capacity    sql.NullInt32
+	CountryCode *string
 }

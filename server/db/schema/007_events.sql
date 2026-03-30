@@ -10,7 +10,6 @@ CREATE TABLE events (
   _home_competitor_id INT REFERENCES competitors(id) ON DELETE RESTRICT,
   _away_competitor_id INT REFERENCES competitors(id) ON DELETE RESTRICT,
   _stage_id INT NOT NULL REFERENCES stages(id) ON DELETE RESTRICT,
-  group_name TEXT,
   details TEXT,
   CONSTRAINT different_competitors CHECK (_home_competitor_id <> _away_competitor_id),
   UNIQUE (_home_competitor_id, _away_competitor_id, venue_date, _stage_id)
