@@ -1,4 +1,4 @@
--- name: CreateResult :exec
+-- name: CreateResult :one
 INSERT INTO results (home_points, away_points, outcome, forfeit_by, _event_id, details)
 VALUES (
   $1,
@@ -7,4 +7,5 @@ VALUES (
   $4,
   $5,
   $6
-);
+)
+RETURNING id;

@@ -9,6 +9,36 @@ import (
 	"context"
 )
 
+const addVenue = `-- name: AddVenue :one
+INSERT INTO venues (name, _country, city, _sport_id)
+VALUES (
+  $1,
+  $2,
+  $3,
+  $4
+)
+RETURNING id
+`
+
+type AddVenueParams struct {
+	Name    string
+	Country *string
+	City    *string
+	SportID int32
+}
+
+func (q *Queries) AddVenue(ctx context.Context, arg AddVenueParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, addVenue,
+		arg.Name,
+		arg.Country,
+		arg.City,
+		arg.SportID,
+	)
+	var id int32
+	err := row.Scan(&id)
+	return id, err
+}
+
 const getVenueByID = `-- name: GetVenueByID :one
 SELECT id, created_at, updated_at, name, city, _country, _sport_id FROM venues
 WHERE id = $1

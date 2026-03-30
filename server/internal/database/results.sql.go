@@ -9,7 +9,7 @@ import (
 	"context"
 )
 
-const createResult = `-- name: CreateResult :exec
+const createResult = `-- name: CreateResult :one
 INSERT INTO results (home_points, away_points, outcome, forfeit_by, _event_id, details)
 VALUES (
   $1,
@@ -19,6 +19,7 @@ VALUES (
   $5,
   $6
 )
+RETURNING id
 `
 
 type CreateResultParams struct {
@@ -30,8 +31,8 @@ type CreateResultParams struct {
 	Details    *string
 }
 
-func (q *Queries) CreateResult(ctx context.Context, arg CreateResultParams) error {
-	_, err := q.db.ExecContext(ctx, createResult,
+func (q *Queries) CreateResult(ctx context.Context, arg CreateResultParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, createResult,
 		arg.HomePoints,
 		arg.AwayPoints,
 		arg.Outcome,
@@ -39,5 +40,7 @@ func (q *Queries) CreateResult(ctx context.Context, arg CreateResultParams) erro
 		arg.EventID,
 		arg.Details,
 	)
-	return err
+	var id int32
+	err := row.Scan(&id)
+	return id, err
 }

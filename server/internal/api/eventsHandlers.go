@@ -50,7 +50,7 @@ type Event struct {
 }
 
 func (cfg ApiConfig) createEventHandler(w http.ResponseWriter, r *http.Request) {
-	r.Body = http.MaxBytesReader(w, r.Body, 2024)
+	r.Body = http.MaxBytesReader(w, r.Body, 2048)
 	defer r.Body.Close()
 
 	type createEvent struct {
@@ -93,7 +93,7 @@ func (cfg ApiConfig) createEventHandler(w http.ResponseWriter, r *http.Request) 
 	var sportID int32
 	var venueID sql.NullInt32
 	if reqData.VenueID != nil {
-		venue, err := cfg.Q.GetVenueByID(r.Context(), reqData.StageID)
+		venue, err := cfg.Q.GetVenueByID(r.Context(), *reqData.VenueID)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				errorResponse(w, http.StatusBadRequest, []string{"INVALID_REQUEST", "Invalid venue"}, fmt.Errorf("could not find venue with given venue ID: %w", err))
@@ -170,7 +170,7 @@ func (cfg ApiConfig) createEventHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if reqData.HomeName != nil && reqData.AwayName != nil {
+	if reqData.HomeName != nil || reqData.AwayName != nil {
 		constraintParams := database.GetEventByConstraintParams{
 			VenueDate:        reqData.VenueDate,
 			StageID:          stage.ID,
@@ -230,7 +230,7 @@ func (cfg ApiConfig) createEventHandler(w http.ResponseWriter, r *http.Request) 
 			EventID:    eventID,
 			Details:    result.ResultDetails,
 		}
-		err := cfg.Q.CreateResult(r.Context(), newResultParams)
+		_, err := qtx.CreateResult(r.Context(), newResultParams)
 		if err != nil {
 			errorResponse(w, http.StatusInternalServerError, []string{"DATABASE_ERROR", "Something went wrong"}, fmt.Errorf("could not create result in the database: %w", err))
 			return

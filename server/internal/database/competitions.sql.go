@@ -9,6 +9,69 @@ import (
 	"context"
 )
 
+const addCompetition = `-- name: AddCompetition :one
+INSERT INTO competitions (name, _sport_id)
+VALUES (
+  $1,
+  $2
+)
+RETURNING id
+`
+
+type AddCompetitionParams struct {
+	Name    string
+	SportID int32
+}
+
+func (q *Queries) AddCompetition(ctx context.Context, arg AddCompetitionParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, addCompetition, arg.Name, arg.SportID)
+	var id int32
+	err := row.Scan(&id)
+	return id, err
+}
+
+const addEdition = `-- name: AddEdition :one
+INSERT INTO editions (season, _competition_id)
+VALUES (
+  $1,
+  $2
+)
+RETURNING id
+`
+
+type AddEditionParams struct {
+	Season        string
+	CompetitionID int32
+}
+
+func (q *Queries) AddEdition(ctx context.Context, arg AddEditionParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, addEdition, arg.Season, arg.CompetitionID)
+	var id int32
+	err := row.Scan(&id)
+	return id, err
+}
+
+const addStage = `-- name: AddStage :one
+INSERT INTO stages (name, _edition_id)
+VALUES (
+  $1,
+  $2
+)
+RETURNING id
+`
+
+type AddStageParams struct {
+	Name      string
+	EditionID int32
+}
+
+func (q *Queries) AddStage(ctx context.Context, arg AddStageParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, addStage, arg.Name, arg.EditionID)
+	var id int32
+	err := row.Scan(&id)
+	return id, err
+}
+
 const getCompByStageID = `-- name: GetCompByStageID :one
 SELECT c.id, c.created_at, c.updated_at, c.name, c._sport_id FROM competitions c
 JOIN editions e ON c.id = e._competition_id
@@ -71,6 +134,24 @@ func (q *Queries) GetCompEditionsForSport(ctx context.Context, name string) ([]G
 		return nil, err
 	}
 	return items, nil
+}
+
+const getEditionByID = `-- name: GetEditionByID :one
+SELECT id, created_at, updated_at, season, _competition_id FROM editions
+WHERE id = $1
+`
+
+func (q *Queries) GetEditionByID(ctx context.Context, id int32) (Edition, error) {
+	row := q.db.QueryRowContext(ctx, getEditionByID, id)
+	var i Edition
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Season,
+		&i.CompetitionID,
+	)
+	return i, err
 }
 
 const getStageByID = `-- name: GetStageByID :one

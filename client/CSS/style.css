@@ -2,6 +2,16 @@ body {
   font-family: Arial, sans-serif;
 }
 
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 8%;
+  width: 100%;
+  background-color: #E0E0E0;
+  padding: 10px;
+  margin: auto;
+}
+
 td {
   border: 1px solid #CFCFCF;
   padding: 8px;

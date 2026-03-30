@@ -5,13 +5,16 @@
     <title>Sports events calendar</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="stylesheet" href="CSS/style.css"</link>
-    <style>
-    </style>
   </head>
   <body>
     <nav>
       <a href="index.html">Calendar</a>
       <a href="createEvent.html">Create new event</a>
+      <a href="index.html">Placeholder</a>
+      <a href="index.html">Placeholder</a>
+      <a href="index.html">Placeholder</a>
+      <a href="index.html">Placeholder</a>
+      <a href="index.html">Placeholder</a>
     </nav>
     <div id="event-container">
       <a href="index.html">Back to calendar</a>
@@ -52,7 +55,7 @@
       const tr = document.createElement("tr");
 
       const tdHome = document.createElement("td");
-      tdHome.textContent = ev.home;
+      tdHome.textContent = ev.home_country ? ev.home_country + " " + ev.home : ev.home;
       if (result.winner === "home") tdHome.classList.add("winner");
       tr.appendChild(tdHome);
 
@@ -63,7 +66,7 @@
       tr.appendChild(tdScore);
 
       const tdAway = document.createElement("td");
-      tdAway.textContent = ev.away;
+      tdAway.textContent = ev.away_country ? ev.away_country + " " + ev.away : ev.away;
       if (result.winner === "away") tdAway.classList.add("winner");
       tr.appendChild(tdAway);
 

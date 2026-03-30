@@ -49,7 +49,6 @@ func computeWinner(homePoints, awayPoints sql.NullInt16, status string, outcome,
 			return "away"
 		}
 	} else if *outcome != "" {
-		status = "finished"
 		if *outcome == "forfeit" && forfeitBy != nil {
 			if *forfeitBy == "home" {
 				return "away"

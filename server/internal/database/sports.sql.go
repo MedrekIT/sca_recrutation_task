@@ -9,6 +9,60 @@ import (
 	"context"
 )
 
+const addSport = `-- name: AddSport :one
+INSERT INTO sports (name)
+VALUES (
+  $1
+)
+RETURNING id, created_at, updated_at, name
+`
+
+func (q *Queries) AddSport(ctx context.Context, name string) (Sport, error) {
+	row := q.db.QueryRowContext(ctx, addSport, name)
+	var i Sport
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Name,
+	)
+	return i, err
+}
+
+const getSportByID = `-- name: GetSportByID :one
+SELECT id, created_at, updated_at, name FROM sports
+WHERE id = $1
+`
+
+func (q *Queries) GetSportByID(ctx context.Context, id int32) (Sport, error) {
+	row := q.db.QueryRowContext(ctx, getSportByID, id)
+	var i Sport
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Name,
+	)
+	return i, err
+}
+
+const getSportByName = `-- name: GetSportByName :one
+SELECT id, created_at, updated_at, name FROM sports
+WHERE name = $1
+`
+
+func (q *Queries) GetSportByName(ctx context.Context, name string) (Sport, error) {
+	row := q.db.QueryRowContext(ctx, getSportByName, name)
+	var i Sport
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Name,
+	)
+	return i, err
+}
+
 const getSports = `-- name: GetSports :many
 SELECT name FROM sports
 `

@@ -9,6 +9,48 @@ import (
 	"context"
 )
 
+const addCompetitor = `-- name: AddCompetitor :one
+INSERT INTO competitors (name, _country, _sport_id)
+VALUES (
+  $1,
+  $2,
+  $3
+)
+RETURNING id
+`
+
+type AddCompetitorParams struct {
+	Name    string
+	Country *string
+	SportID int32
+}
+
+func (q *Queries) AddCompetitor(ctx context.Context, arg AddCompetitorParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, addCompetitor, arg.Name, arg.Country, arg.SportID)
+	var id int32
+	err := row.Scan(&id)
+	return id, err
+}
+
+const getCompetitorByID = `-- name: GetCompetitorByID :one
+SELECT id, created_at, updated_at, name, _country, _sport_id FROM competitors
+WHERE id = $1
+`
+
+func (q *Queries) GetCompetitorByID(ctx context.Context, id int32) (Competitor, error) {
+	row := q.db.QueryRowContext(ctx, getCompetitorByID, id)
+	var i Competitor
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Name,
+		&i.Country,
+		&i.SportID,
+	)
+	return i, err
+}
+
 const getCompetitorByName = `-- name: GetCompetitorByName :one
 SELECT id, created_at, updated_at, name, _country, _sport_id FROM competitors
 WHERE name = $1

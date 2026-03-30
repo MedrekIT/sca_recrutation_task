@@ -1,3 +1,13 @@
+-- name: AddVenue :one
+INSERT INTO venues (name, _country, city, _sport_id)
+VALUES (
+  $1,
+  $2,
+  $3,
+  $4
+)
+RETURNING id;
+
 -- name: GetVenueByID :one
 SELECT * FROM venues
 WHERE id = $1;

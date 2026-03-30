@@ -1,3 +1,27 @@
+-- name: AddCompetition :one
+INSERT INTO competitions (name, _sport_id)
+VALUES (
+  $1,
+  $2
+)
+RETURNING id;
+
+-- name: AddEdition :one
+INSERT INTO editions (season, _competition_id)
+VALUES (
+  $1,
+  $2
+)
+RETURNING id;
+
+-- name: AddStage :one
+INSERT INTO stages (name, _edition_id)
+VALUES (
+  $1,
+  $2
+)
+RETURNING id;
+
 -- name: GetCompEditionsForSport :many
 SELECT 
   c.name,
@@ -17,6 +41,10 @@ SELECT c.* FROM competitions c
 JOIN editions e ON c.id = e._competition_id
 JOIN stages s ON e.id = s._edition_id
 WHERE s.id = $1;
+
+-- name: GetEditionByID :one
+SELECT * FROM editions
+WHERE id = $1;
 
 -- name: GetStageByID :one
 SELECT * FROM stages

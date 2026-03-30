@@ -24,9 +24,12 @@ func Routes(cfg ApiConfig) http.Handler {
 	mu.HandleFunc("GET /api/competitions/{editionID}/stages", cfg.getCompStagesHandler)
 	mu.HandleFunc("GET /api/sports/{sportName}/venues", cfg.getSportVenuesHandler)
 
-	// mu.HandleFunc("POST /api/sports", cfg.addSportsHandler)
-	// mu.HandleFunc("POST /api/competitions", cfg.addCompetitionsHandler)
-	// mu.HandleFunc("POST /api/competitors", cfg.addCompetitorsHandler)
+	mu.HandleFunc("POST /api/sports", cfg.addSportHandler)
+	mu.HandleFunc("POST /api/countries", cfg.addCountryHandler)
+	mu.HandleFunc("POST /api/competitions", cfg.addCompetitionHandler)
+	mu.HandleFunc("POST /api/competitions/{editionID}/stages", cfg.addStageHandler)
+	mu.HandleFunc("POST /api/competitors", cfg.addCompetitorHandler)
+	mu.HandleFunc("POST /api/venues", cfg.addVenueHandler)
 	mu.HandleFunc("POST /api/events", cfg.createEventHandler)
 
 	return mu
