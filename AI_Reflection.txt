@@ -1,0 +1,1 @@
+AI in my solution was mainly used to adjust the frontend to my requirements and to generate mock database records, so I could test if they work. I was also taking advice to keep my code a bit cleaner and avoid really simple mistakes and typos.
